@@ -3,7 +3,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import analysis, graphs, health
+from app.routes import (
+    analysis,
+    analysis_runs,
+    curriculum,
+    db_health,
+    graphs,
+    health,
+    recommendations,
+    schools,
+    student_cases,
+    students,
+)
 
 app = FastAPI(
     title="Gap Detection System API",
@@ -20,6 +31,12 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(db_health.router)
+app.include_router(schools.router)
+app.include_router(students.router)
+app.include_router(student_cases.router)
+app.include_router(curriculum.router)
+app.include_router(analysis_runs.router)
+app.include_router(recommendations.router)
 app.include_router(analysis.router)
 app.include_router(graphs.router)
-

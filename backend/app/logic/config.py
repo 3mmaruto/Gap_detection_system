@@ -16,7 +16,9 @@ class DataSettings:
     topics_csv: str | None = os.getenv("GAP_TOPICS_CSV")
     prereq_csv: str | None = os.getenv("GAP_PREREQ_CSV")
     student_cases_csv: str | None = os.getenv("GAP_STUDENT_CASES_CSV")
+    data_source: str = os.getenv("KGDS_DATA_SOURCE", "sheets").lower()
+    db_required: bool = os.getenv("KGDS_DB_REQUIRED", "false").lower() in {"1", "true", "yes"}
+    persist_analysis: bool = os.getenv("KGDS_PERSIST_ANALYSIS", "false").lower() in {"1", "true", "yes"}
 
 
 settings = DataSettings()
-

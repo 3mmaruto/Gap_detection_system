@@ -46,6 +46,18 @@ Open locally:
 Start-Process .\frontend\index.html
 ```
 
+One-click local preview on Windows:
+
+```powershell
+.\run_local_preview.ps1
+```
+
+Or double-click:
+
+```text
+run_local_preview.bat
+```
+
 For GitHub Pages, configure Pages to publish from the `frontend/` folder if your repository settings allow it. If not, publish from a branch or copy the static frontend files into the Pages source branch during deployment.
 
 ## Backend
@@ -67,6 +79,36 @@ Health check:
 ```text
 GET http://localhost:8080/health
 ```
+
+## PostgreSQL MVP Foundation
+
+The backend now includes a PostgreSQL-ready data layer using SQLAlchemy 2.x and Alembic. This is optional at runtime: the existing Google Sheet rule-based pipeline remains the default.
+
+Configure PostgreSQL:
+
+```powershell
+$env:DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/kgds"
+```
+
+Run migrations from `backend/`:
+
+```powershell
+alembic upgrade head
+```
+
+Import the current Google Sheet curriculum/prototype data:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8080/curriculum/import -ContentType "application/json" -Body "{}"
+```
+
+Use PostgreSQL as the rule-engine data source:
+
+```powershell
+$env:KGDS_DATA_SOURCE="postgres"
+```
+
+See `docs/database_architecture.md` and `docs/kgds_schema.dbml` for the schema and ERD-ready DBML.
 
 ## Data Source
 

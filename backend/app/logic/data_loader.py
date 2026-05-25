@@ -68,9 +68,25 @@ def _require_columns(df: pd.DataFrame, required: set[str], label: str) -> None:
 
 @lru_cache(maxsize=1)
 def load_curriculum_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    topics = _clean_topics(_read_csv(settings.topics_csv, settings.topics_gid))
-    prereqs = _clean_prereqs(_read_csv(settings.prereq_csv, settings.prereq_gid))
-    cases = _clean_cases(_read_csv(settings.student_cases_csv, settings.student_cases_gid))
+    if settings.data_source in {"postgres", "postgresql", "db"}:
+        try:
+            from app.services.curriculum_dataframe import load_curriculum_dataframes_from_db
+
+            topics, prereqs, cases = load_curriculum_dataframes_from_db()
+        except Exception:
+            if settings.db_required:
+                raise
+            topics = _clean_topics(_read_csv(settings.topics_csv, settings.topics_gid))
+            prereqs = _clean_prereqs(_read_csv(settings.prereq_csv, settings.prereq_gid))
+            cases = _clean_cases(_read_csv(settings.student_cases_csv, settings.student_cases_gid))
+    else:
+        topics = _clean_topics(_read_csv(settings.topics_csv, settings.topics_gid))
+        prereqs = _clean_prereqs(_read_csv(settings.prereq_csv, settings.prereq_gid))
+        cases = _clean_cases(_read_csv(settings.student_cases_csv, settings.student_cases_gid))
+
+    topics = _clean_topics(topics)
+    prereqs = _clean_prereqs(prereqs)
+    cases = _clean_cases(cases)
 
     _require_columns(
         topics,
@@ -100,4 +116,3 @@ def load_curriculum_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         "prerequisite",
     )
     return topics, prereqs, cases
-

@@ -1,0 +1,533 @@
+Project kgds_school_decision_support {
+  database_type: "PostgreSQL"
+  Note: "KGDS is a knowledge-gap subsystem inside a school decision-support platform."
+}
+
+// Identity and Access
+
+Table users {
+  id int [pk]
+  full_name varchar
+  email varchar [unique]
+  phone varchar
+  password_hash varchar
+  status varchar
+  last_login_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table roles {
+  id int [pk]
+  name varchar [unique]
+  description text
+}
+
+Table permissions {
+  id int [pk]
+  code varchar [unique]
+  description text
+}
+
+Table user_roles {
+  id int [pk]
+  user_id int [ref: > users.id]
+  role_id int [ref: > roles.id]
+  school_id int [ref: > schools.id]
+  ministry_scope varchar
+
+  Indexes {
+    (user_id, role_id, school_id) [unique, name: "uq_user_role_scope"]
+  }
+}
+
+Table role_permissions {
+  id int [pk]
+  role_id int [ref: > roles.id]
+  permission_id int [ref: > permissions.id]
+
+  Indexes {
+    (role_id, permission_id) [unique, name: "uq_role_permission"]
+  }
+}
+
+// School Core
+
+Table schools {
+  id int [pk]
+  name varchar
+  code varchar [unique]
+  type varchar
+  country varchar
+  city varchar
+  region varchar
+  address text
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table academic_years {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  name varchar
+  start_date date
+  end_date date
+  is_active boolean
+}
+
+Table class_sections {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  academic_year_id int [ref: > academic_years.id]
+  grade varchar
+  stream varchar
+  section_name varchar
+  homeroom_teacher_id int [ref: > users.id]
+  status varchar
+}
+
+Table students {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  student_number varchar
+  first_name varchar
+  father_name varchar
+  mother_name varchar
+  last_name varchar
+  full_name varchar
+  date_of_birth date
+  gender varchar
+  nationality varchar
+  current_grade varchar
+  current_stream varchar
+  current_section_id int [ref: > class_sections.id]
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+
+  Indexes {
+    (school_id, student_number) [unique, name: "uq_school_student_number"]
+  }
+}
+
+Table enrollments {
+  id int [pk]
+  student_id int [ref: > students.id]
+  class_section_id int [ref: > class_sections.id]
+  academic_year_id int [ref: > academic_years.id]
+  enrollment_date date
+  status varchar
+}
+
+Table teacher_assignments {
+  id int [pk]
+  teacher_user_id int [ref: > users.id]
+  school_id int [ref: > schools.id]
+  class_section_id int [ref: > class_sections.id]
+  subject_id int [ref: > subjects.id]
+  academic_year_id int [ref: > academic_years.id]
+  status varchar
+}
+
+// Curriculum Knowledge Base
+
+Table subjects {
+  id int [pk]
+  code varchar [unique]
+  name_en varchar
+  name_native varchar
+  description text
+}
+
+Table curriculum_systems {
+  id int [pk]
+  name varchar
+  country varchar
+  language varchar
+  description text
+  status varchar
+}
+
+Table curriculum_versions {
+  id int [pk]
+  curriculum_system_id int [ref: > curriculum_systems.id]
+  version_name varchar
+  year_from int
+  year_to int
+  description text
+  is_active boolean
+}
+
+Table curriculum_topics {
+  id int [pk]
+  external_topic_id varchar [unique]
+  curriculum_system_id int [ref: > curriculum_systems.id]
+  curriculum_version_id int [ref: > curriculum_versions.id]
+  country varchar
+  grade varchar
+  stream varchar
+  subject_id int [ref: > subjects.id]
+  subject_branch varchar
+  unit_name_native varchar
+  unit_name_en varchar
+  topic_name_native varchar
+  topic_name_en varchar
+  topic_order float
+  is_core_topic boolean
+  difficulty_level varchar
+  metadata_json jsonb
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table curriculum_edges {
+  id int [pk]
+  source_topic_id int [ref: > curriculum_topics.id]
+  target_topic_id int [ref: > curriculum_topics.id]
+  relation_type varchar
+  weight float
+  description text
+  metadata_json jsonb
+
+  Indexes {
+    (source_topic_id, target_topic_id, relation_type) [unique, name: "uq_curriculum_edge"]
+  }
+}
+
+Table curriculum_equivalences {
+  id int [pk]
+  topic_id_a int [ref: > curriculum_topics.id]
+  topic_id_b int [ref: > curriculum_topics.id]
+  equivalence_type varchar
+  confidence_score float
+  notes text
+  source varchar
+}
+
+Table curriculum_import_batches {
+  id int [pk]
+  source_type varchar
+  source_uri text
+  imported_by_user_id int [ref: > users.id]
+  imported_at timestamp
+  status varchar
+  summary_json jsonb
+}
+
+// Student Evidence
+
+Table student_cases {
+  id int [pk]
+  student_id int [ref: > students.id]
+  school_id int [ref: > schools.id]
+  case_code varchar [unique]
+  origin_country varchar
+  target_country varchar
+  target_grade varchar
+  target_stream varchar
+  subject_focus varchar
+  grades_studied_abroad jsonb
+  last_completed_grade_abroad varchar
+  overall_difficulty float
+  math_difficulty float
+  reading_difficulty float
+  notes text
+  raw_input_json jsonb
+  source_type varchar
+  created_by_user_id int [ref: > users.id]
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table student_education_paths {
+  id int [pk]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  grade varchar
+  country varchar
+  city varchar
+  school_name varchar
+  curriculum_system_id int [ref: > curriculum_systems.id]
+  academic_year_label varchar
+  completed_status varchar
+  evidence_type varchar
+  notes text
+  source_confidence float
+  created_at timestamp
+}
+
+Table assessment_types {
+  id int [pk]
+  code varchar [unique]
+  name varchar
+  description text
+}
+
+Table assessment_results {
+  id int [pk]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  subject_id int [ref: > subjects.id]
+  assessment_type_id int [ref: > assessment_types.id]
+  grade_level_target varchar
+  score_raw varchar
+  score_percent float
+  risk_label varchar
+  assessment_date date
+  source_document_id int [ref: > uploaded_documents.id]
+  metadata_json jsonb
+  created_by_user_id int [ref: > users.id]
+}
+
+Table student_prior_grades {
+  id int [pk]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  subject_id int [ref: > subjects.id]
+  grade varchar
+  country varchar
+  school_name varchar
+  academic_year_label varchar
+  mark_raw varchar
+  mark_normalized float
+  source_document_id int [ref: > uploaded_documents.id]
+  confidence_score float
+  metadata_json jsonb
+}
+
+// Documents and Agentic Intake
+
+Table uploaded_documents {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  uploaded_by_user_id int [ref: > users.id]
+  document_type varchar
+  original_filename varchar
+  storage_uri text
+  mime_type varchar
+  file_size int
+  upload_status varchar
+  created_at timestamp
+  metadata_json jsonb
+}
+
+Table document_extraction_jobs {
+  id int [pk]
+  document_id int [ref: > uploaded_documents.id]
+  requested_by_user_id int [ref: > users.id]
+  status varchar
+  processor_type varchar
+  started_at timestamp
+  completed_at timestamp
+  error_message text
+  raw_output_json jsonb
+}
+
+Table extracted_records {
+  id int [pk]
+  extraction_job_id int [ref: > document_extraction_jobs.id]
+  document_id int [ref: > uploaded_documents.id]
+  student_id int [ref: > students.id]
+  record_type varchar
+  extracted_json jsonb
+  confidence_score float
+  review_status varchar
+  reviewed_by_user_id int [ref: > users.id]
+  reviewed_at timestamp
+  applied_to_database boolean
+}
+
+Table agent_tasks {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  requested_by_user_id int [ref: > users.id]
+  task_type varchar
+  task_prompt text
+  status varchar
+  input_json jsonb
+  output_json jsonb
+  requires_human_approval boolean
+  approved_by_user_id int [ref: > users.id]
+  approved_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+// KGDS Analysis
+
+Table analysis_runs {
+  id int [pk]
+  case_id int [ref: > student_cases.id]
+  student_id int [ref: > students.id]
+  school_id int [ref: > schools.id]
+  analysis_type varchar
+  input_snapshot_json jsonb
+  rule_engine_version varchar
+  status varchar
+  started_at timestamp
+  completed_at timestamp
+  created_by_user_id int [ref: > users.id]
+  error_message text
+}
+
+Table detected_gaps {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  topic_id int [ref: > curriculum_topics.id]
+  gap_type varchar
+  severity_score float
+  status varchar
+  evidence_json jsonb
+  explanation_text text
+}
+
+Table support_recommendations {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  topic_id int [ref: > curriculum_topics.id]
+  priority_rank int
+  recommendation_type varchar
+  reason_text text
+  evidence_json jsonb
+}
+
+Table graph_snapshots {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  graph_type varchar
+  nodes_json jsonb
+  edges_json jsonb
+  created_at timestamp
+}
+
+// ML and Fusion
+
+Table model_versions {
+  id int [pk]
+  model_name varchar
+  version varchar
+  task varchar
+  artifact_uri text
+  training_dataset varchar
+  metrics_json jsonb
+  feature_schema_json jsonb
+  is_active boolean
+  created_at timestamp
+}
+
+Table model_outputs {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  model_version_id int [ref: > model_versions.id]
+  model_name varchar
+  output_json jsonb
+  probability float
+  prediction_label varchar
+  confidence_score float
+  input_features_json jsonb
+  created_at timestamp
+}
+
+Table fusion_results {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  fusion_version varchar
+  structural_gap_score float
+  contextual_risk_score float
+  assessment_risk_score float
+  final_support_score float
+  final_support_band varchar
+  evidence_confidence_score float
+  evidence_confidence_band varchar
+  dominant_evidence_source varchar
+  recommended_action text
+  contributions_json jsonb
+  created_at timestamp
+}
+
+// Reports and Interventions
+
+Table teacher_reports {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  report_title varchar
+  summary_text text
+  teacher_alert_text text
+  recommended_plan_json jsonb
+  generated_at timestamp
+  generated_by_user_id int [ref: > users.id]
+}
+
+Table teacher_feedback {
+  id int [pk]
+  report_id int [ref: > teacher_reports.id]
+  analysis_run_id int [ref: > analysis_runs.id]
+  teacher_user_id int [ref: > users.id]
+  feedback_type varchar
+  feedback_text text
+  corrected_topic_id int [ref: > curriculum_topics.id]
+  created_at timestamp
+}
+
+Table intervention_plans {
+  id int [pk]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  analysis_run_id int [ref: > analysis_runs.id]
+  created_by_user_id int [ref: > users.id]
+  title varchar
+  status varchar
+  start_date date
+  end_date date
+  plan_json jsonb
+}
+
+Table intervention_progress {
+  id int [pk]
+  intervention_plan_id int [ref: > intervention_plans.id]
+  topic_id int [ref: > curriculum_topics.id]
+  status varchar
+  progress_note text
+  updated_by_user_id int [ref: > users.id]
+  updated_at timestamp
+}
+
+// Analytics and Audit
+
+Table analytics_snapshots {
+  id int [pk]
+  snapshot_type varchar
+  scope_type varchar
+  scope_id int
+  generated_at timestamp
+  metrics_json jsonb
+}
+
+Table audit_logs {
+  id int [pk]
+  user_id int [ref: > users.id]
+  school_id int [ref: > schools.id]
+  action varchar
+  entity_type varchar
+  entity_id int
+  before_json jsonb
+  after_json jsonb
+  ip_address varchar
+  user_agent text
+  created_at timestamp
+}
+
+Table system_events {
+  id int [pk]
+  event_type varchar
+  severity varchar
+  message text
+  metadata_json jsonb
+  created_at timestamp
+}
