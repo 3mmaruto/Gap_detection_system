@@ -53,6 +53,9 @@ class StudentCreate(BaseModel):
     nationality: str | None = None
     current_grade: str | None = None
     current_stream: str | None = None
+    student_phone: str | None = None
+    mother_phone: str | None = None
+    father_phone: str | None = None
     current_section_id: int | None = None
     status: str = "active"
 
@@ -69,6 +72,9 @@ class StudentUpdate(BaseModel):
     nationality: str | None = None
     current_grade: str | None = None
     current_stream: str | None = None
+    student_phone: str | None = None
+    mother_phone: str | None = None
+    father_phone: str | None = None
     current_section_id: int | None = None
     status: str | None = None
 
@@ -77,6 +83,60 @@ class StudentRead(ORMModel, StudentCreate):
     id: int
     created_at: datetime
     updated_at: datetime
+
+
+class PriorEducationPathInput(BaseModel):
+    grade: str
+    country: str
+    stream: str | None = None
+    school_name: str | None = None
+    document_type: str | None = None
+    original_filename: str | None = None
+    mime_type: str | None = None
+
+
+class StudentRegistrationRequest(BaseModel):
+    school_id: int | None = None
+    full_name: str
+    mother_name: str
+    father_name: str
+    date_of_birth: date
+    target_grade: str
+    target_stream: str
+    student_phone: str | None = None
+    mother_phone: str | None = None
+    father_phone: str | None = None
+    studied_outside_syria: bool = False
+    studied_country: str | None = None
+    prior_education: list[PriorEducationPathInput] = Field(default_factory=list)
+    notes: str | None = None
+
+
+class StudentEducationPathRead(ORMModel):
+    id: int
+    student_id: int
+    case_id: int | None
+    grade: str
+    country: str
+    stream: str | None
+    school_name: str | None
+    evidence_type: str | None
+    notes: str | None
+    created_at: datetime
+
+
+class UploadedDocumentRead(ORMModel):
+    id: int
+    school_id: int
+    student_id: int | None
+    case_id: int | None
+    document_type: str | None
+    original_filename: str
+    storage_uri: str
+    mime_type: str | None
+    upload_status: str
+    created_at: datetime
+    metadata_json: dict[str, Any] | None
 
 
 class StudentCaseCreate(BaseModel):
@@ -104,6 +164,20 @@ class StudentCaseRead(ORMModel, StudentCaseCreate):
     id: int
     created_at: datetime
     updated_at: datetime
+
+
+class StudentRegistrationResponse(BaseModel):
+    student: StudentRead
+    case: StudentCaseRead
+    education_paths: list[StudentEducationPathRead]
+    documents: list[UploadedDocumentRead]
+
+
+class StudentProfileRead(BaseModel):
+    student: StudentRead
+    cases: list[StudentCaseRead]
+    education_paths: list[StudentEducationPathRead]
+    documents: list[UploadedDocumentRead]
 
 
 class CurriculumTopicRead(ORMModel):
@@ -148,6 +222,53 @@ class RoleSeedResponse(BaseModel):
     roles_created: int
     permissions_created: int
     role_permissions_created: int
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class CurrentUserRead(BaseModel):
+    id: int
+    full_name: str
+    email: str | None
+    roles: list[str]
+    school_id: int | None = None
+    school_name: str | None = None
+
+
+class UserCreate(BaseModel):
+    full_name: str
+    email: str
+    password: str
+    role: str = "teacher"
+    school_id: int | None = None
+    status: str = "active"
+
+
+class UserRead(ORMModel):
+    id: int
+    full_name: str
+    email: str | None
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    roles: list[str] = Field(default_factory=list)
+    school_id: int | None = None
+    school_name: str | None = None
+
+
+class BootstrapDemoResponse(BaseModel):
+    school_id: int
+    user_id: int
+    email: str
+    role: str
 
 
 class AnalysisRunRead(ORMModel):
