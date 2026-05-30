@@ -62,79 +62,10 @@ For GitHub Pages, configure Pages to publish from the `frontend/` folder if your
 
 ## Backend
 
-The backend uses FastAPI and refactors the original notebook-style logic into maintainable modules.
-
-Run locally:
 
 ```powershell
 cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8080
+npm install
+npx prisma migrate dev --name init
+npx prisma db seed
 ```
-
-Health check:
-
-```text
-GET http://localhost:8080/health
-```
-
-## PostgreSQL MVP Foundation
-
-The backend now includes a PostgreSQL-ready data layer using SQLAlchemy 2.x and Alembic. This is optional at runtime: the existing Google Sheet rule-based pipeline remains the default.
-
-Configure PostgreSQL:
-
-```powershell
-$env:DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/kgds"
-```
-
-Run migrations from `backend/`:
-
-```powershell
-alembic upgrade head
-```
-
-Import the current Google Sheet curriculum/prototype data:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8080/curriculum/import -ContentType "application/json" -Body "{}"
-```
-
-Use PostgreSQL as the rule-engine data source:
-
-```powershell
-$env:KGDS_DATA_SOURCE="postgres"
-```
-
-See `docs/database_architecture.md` and `docs/kgds_schema.dbml` for the schema and ERD-ready DBML.
-
-## Data Source
-
-By default, the backend reads the same Google Sheet used by the prototype:
-
-- topics sheet
-- prerequisite edges sheet
-- student cases sheet
-
-For Cloud Run or offline demos, set local CSV paths through environment variables:
-
-```text
-GAP_TOPICS_CSV=/app/data/topics.csv
-GAP_PREREQ_CSV=/app/data/prerequisites.csv
-GAP_STUDENT_CASES_CSV=/app/data/student_cases.csv
-```
-
-## Main API Routes
-
-- `GET /health`
-- `POST /analyze-student-case`
-- `POST /student-graph`
-- `POST /curriculum-graph`
-
-## Deployment Direction
-
-- Frontend: GitHub Pages static hosting.
-- Backend: Cloud Run-ready Dockerfile in `backend/`.
-- Graph layer: backend returns graph-ready `nodes` and `edges`; the current frontend renders them with Cytoscape.js, and Neo4j storage can be added later without changing the teacher workflow contract.
