@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import type { Post as PostModel } from "@/types/models.types";
 import { POST_TYPE_LABELS } from "@/types/models.types";
 
@@ -13,7 +14,9 @@ interface PostProps {
 }
 
 export default function Post({ post, onClick }: PostProps) {
+    const navigate = useNavigate();
     const accent = TYPE_COLORS[post.type] ?? "#6366f1";
+    const handleClick = () => onClick ? onClick(post) : navigate(`/posts/${post.id}`);
 
     return (
         <div
@@ -28,8 +31,8 @@ export default function Post({ post, onClick }: PostProps) {
                 cursor: "pointer",
                 transition: "box-shadow .15s ease, transform .15s ease",
             }}
-            onClick={() => onClick?.(post)}
-            onKeyDown={(e) => e.key === "Enter" && onClick?.(post)}
+            onClick={handleClick}
+            onKeyDown={(e) => e.key === "Enter" && handleClick()}
             onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLDivElement;
                 el.style.boxShadow = "0 4px 14px rgba(99,102,241,.18)";
@@ -81,6 +84,26 @@ export default function Post({ post, onClick }: PostProps) {
                 >
                     {post.title}
                 </p>
+                {post.author_alias && (
+                    <span
+                        className="d-flex align-items-center gap-1 text-truncate"
+                        style={{ fontSize: "0.6rem", color: "#6366f1", fontWeight: 600 }}
+                    >
+                        <i className="bi bi-building" />
+                        {post.author_alias}
+                    </span>
+                )}
+                <span
+                    className="d-flex align-items-center gap-1"
+                    style={{ fontSize: "0.62rem", color: "#94a3b8" }}
+                >
+                    <i className="bi bi-calendar3" />
+                    {new Date(post.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                    })}
+                </span>
             </div>
         </div>
     );

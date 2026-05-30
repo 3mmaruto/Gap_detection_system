@@ -11,7 +11,11 @@ export function useFilter<V extends string | number>(
     initial: FilterValue<V> = ALL,
 ) {
     const [selected, setSelected] = useState<FilterValue<V>>(initial);
+    // Expose a plain value setter so FilterBar's generic inference works correctly.
+    // React's Dispatch<SetStateAction<T>> includes the function-update overload,
+    // which breaks the (value: FilterValue<V>) => void constraint on FilterBar.onChange.
+    const update = useCallback((v: FilterValue<V>) => setSelected(v), []);
     const reset = useCallback(() => setSelected(ALL), []);
     const isAll = selected === ALL;
-    return { selected, setSelected, reset, isAll };
+    return { selected, setSelected: update, reset, isAll };
 }

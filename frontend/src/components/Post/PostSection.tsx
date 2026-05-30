@@ -10,7 +10,7 @@ interface PostSectionProps {
 }
 
 export default function PostSection({
-    title = "Posts",
+    title = "",
     posts,
     loading = false,
     emptyLabel = "Nothing here yet.",

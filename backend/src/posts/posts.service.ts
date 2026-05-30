@@ -51,6 +51,7 @@ export class PostsService {
         content: dto.content,
         thumbnail_url: dto.thumbnail_url,
         subject_id: dto.subject_id,
+        author_alias: dto.author_alias,
         user_id: userId,
       },
       include: {

@@ -11,6 +11,8 @@ import AppLayout from "@/components/layout/AppLayout";
 import ProtectedRoute from "@/components/routing/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { APP_ROUTES, HOME_BY_ROLE } from "@/lib/routes";
+import { ConversationProvider } from "@/contexts/ConversationContext";
+import ConversationWindow from "@/components/Converstation/Converstation";
 
 import LoginPage from "@/pages/Common/Login";
 import NotFound from "@/pages/Common/NotFound";
@@ -31,26 +33,31 @@ function RootRedirect() {
 
 export default function App() {
     return (
-        <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-                <Route path="/" element={<RootRedirect />} />
-                <Route path="/login" element={<LoginPage />} />
+        <ConversationProvider>
+            <BrowserRouter>
+                <ScrollToTop />
+                <Routes>
+                    <Route path="/" element={<RootRedirect />} />
+                    <Route path="/login" element={<LoginPage />} />
 
-                {APP_ROUTES.map((route) => (
-                    <Route
-                        key={route.path}
-                        path={route.path}
-                        element={
-                            <ProtectedRoute allow={route.roles}>
-                                <AppLayout>{route.element}</AppLayout>
-                            </ProtectedRoute>
-                        }
-                    />
-                ))}
+                    {APP_ROUTES.map((route) => (
+                        <Route
+                            key={route.path}
+                            path={route.path}
+                            element={
+                                <ProtectedRoute allow={route.roles}>
+                                    <AppLayout>{route.element}</AppLayout>
+                                </ProtectedRoute>
+                            }
+                        />
+                    ))}
 
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </BrowserRouter>
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+
+                {/* Global floating chat window — renders on top of everything when a conversation is active */}
+                <ConversationWindow />
+            </BrowserRouter>
+        </ConversationProvider>
     );
 }

@@ -236,6 +236,7 @@ model Post {
   type          PostType @default(ANNOUNCEMENT)
   content       String?
   thumbnail_url String?
+  author_alias  String?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 

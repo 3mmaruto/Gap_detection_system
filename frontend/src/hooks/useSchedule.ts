@@ -3,13 +3,14 @@ import { useApi } from "./useApi";
 import { endpoints } from "@/lib/api";
 import type { WeekSchedule } from "@/types/schedule.types";
 
-export function useSchedule(subjectId?: number) {
-    const path = useMemo(
-        () => subjectId
-            ? `${endpoints.schedule.week()}?subject_id=${subjectId}`
-            : endpoints.schedule.week(),
-        [subjectId],
-    );
+export function useSchedule(subjectId?: number, levelId?: number) {
+    const path = useMemo(() => {
+        const params = new URLSearchParams();
+        if (subjectId) params.set('subject_id', String(subjectId));
+        else if (levelId) params.set('level_id', String(levelId));
+        const qs = params.toString();
+        return qs ? `${endpoints.schedule.week()}?${qs}` : endpoints.schedule.week();
+    }, [subjectId, levelId]);
 
     const { data, loading, error, refetch } = useApi<WeekSchedule>(path);
 

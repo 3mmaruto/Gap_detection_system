@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query, Request, UseGuards } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -19,12 +19,29 @@ export class StudentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { id: number; role: string } },
+  ) {
+    await this.studentsService.assertAccess(req.user.id, req.user.role, id);
     return this.studentsService.findOne(id);
   }
 
   @Get(':id/history')
-  history(@Param('id', ParseIntPipe) id: number) {
+  async history(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { id: number; role: string } },
+  ) {
+    await this.studentsService.assertAccess(req.user.id, req.user.role, id);
     return this.studentsService.history(id);
+  }
+
+  @Get(':id/levels')
+  async levels(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { id: number; role: string } },
+  ) {
+    await this.studentsService.assertAccess(req.user.id, req.user.role, id);
+    return this.studentsService.levels(id);
   }
 }

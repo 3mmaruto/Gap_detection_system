@@ -9,6 +9,8 @@ interface IconDropdownProps {
     /** Stretch the menu to full viewport width, anchored below the header. */
     fullWidth?: boolean;
     onFooterClick?: () => void;
+    /** Called once each time the dropdown transitions from closed → open. */
+    onOpen?: () => void;
     children: ReactNode;
 }
 
@@ -21,11 +23,20 @@ export default function IconDropdown({
     align = "start",
     fullWidth = false,
     onFooterClick,
+    onOpen,
     children,
 }: IconDropdownProps) {
     const menuClass = fullWidth
         ? "dropdown-menu dropdown-menu-fw"
         : `dropdown-menu${align === "end" ? " dropdown-menu-end" : ""}`;
+
+    // Bootstrap sets aria-expanded AFTER its click handler runs.
+    // At the time our onClick fires, aria-expanded still reflects the
+    // current (pre-click) state, so "false" means the dropdown is about to open.
+    const handleToggle = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        const currentlyOpen = e.currentTarget.getAttribute("aria-expanded") === "true";
+        if (!currentlyOpen) onOpen?.();
+    };
 
     return (
         <div className="dropdown">
@@ -37,6 +48,7 @@ export default function IconDropdown({
                 /* disable Popper when full-width so CSS positioning takes over */
                 {...(fullWidth ? { "data-bs-display": "static" } : { "data-bs-offset": "9999,14" })}
                 role="button"
+                onClick={handleToggle}
             >
                 <div className="position-relative d-inline-block">
                     <i className={`bi ${icon} fs-5`} />

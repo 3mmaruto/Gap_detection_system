@@ -1,8 +1,9 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseIntPipe,
+  Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe,
   Patch, Post, Query, Request, UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { StudentsService } from '../students/students.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,7 +11,10 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('users/v1')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly studentsService: StudentsService,
+  ) {}
 
   @Get()
   findAll(
@@ -28,7 +32,14 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { id: number; role: string } },
+  ) {
+    // Students can only view their own profile
+    if (req.user.role === 'student' && req.user.id !== id) {
+      throw new ForbiddenException();
+    }
     return this.usersService.findOne(id);
   }
 

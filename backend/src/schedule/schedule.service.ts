@@ -7,9 +7,24 @@ import { AddSyllabusDto } from './dto/add-syllabus.dto';
 export class ScheduleService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(subjectId?: number) {
+  async findAll(subjectId?: number, levelId?: number) {
+    let whereSubjectIds: number[] | undefined;
+    if (levelId && !subjectId) {
+      const sl = await this.prisma.subjectLevel.findMany({
+        where: { level_id: levelId },
+        select: { subject_id: true },
+      });
+      whereSubjectIds = sl.map((r) => r.subject_id);
+    }
+
+    const where = subjectId
+      ? { subject_id: subjectId }
+      : whereSubjectIds
+        ? { subject_id: { in: whereSubjectIds } }
+        : undefined;
+
     const items = await this.prisma.scheduleItem.findMany({
-      where: subjectId ? { subject_id: subjectId } : undefined,
+      where,
       include: {
         subject: { select: { id: true, name: true, name_ar: true } },
         assignedBy: { select: { id: true, first_name: true, last_name: true } },

@@ -19,7 +19,9 @@ import AdminAddPost from "@/pages/Admin/AddPost";
 import AdminAddUser from "@/pages/Admin/AddUser";
 import TeacherAddPost from "@/pages/Teacher/AddPost";
 import ProfilePage from "@/pages/Common/Profile";
+import PostPage from "@/pages/Common/PostPage";
 import NotificationsPage from "@/pages/Common/Notifications";
+import MessagesPage from "@/pages/Common/Messages";
 
 export interface AppRoute {
     /** URL path (use React Router syntax, e.g. "/profile/:id") */
@@ -87,6 +89,13 @@ export const APP_ROUTES: AppRoute[] = [
         inNav: false,
     },
     {
+        path: "/messages",
+        name: "Messages",
+        roles: ["student", "teacher", "admin"],
+        element: <MessagesPage />,
+        inNav: false,
+    },
+    {
         path: "/notifications",
         name: "Notifications",
         roles: ["student", "teacher", "admin"],
@@ -98,6 +107,13 @@ export const APP_ROUTES: AppRoute[] = [
         name: "Profile",
         roles: ["student", "teacher", "admin"],
         element: <ProfilePage />,
+        inNav: false,
+    },
+    {
+        path: "/posts/:id",
+        name: "Post",
+        roles: ["student", "teacher", "admin"],
+        element: <PostPage />,
         inNav: false,
     },
 ];

@@ -19,6 +19,12 @@ export default function NotificationsDropdown() {
         refetch();
     };
 
+    const handleOpen = async () => {
+        if (unseen === 0) return;
+        await apiFetch(endpoints.notifications.markAllSeen, { method: "PATCH" }).catch(() => null);
+        refetch();
+    };
+
     return (
         <IconDropdown
             icon="bi-bell"
@@ -27,6 +33,7 @@ export default function NotificationsDropdown() {
             footerLabel="Show all notifications"
             fullWidth
             onFooterClick={() => navigate("/notifications")}
+            onOpen={handleOpen}
         >
             {notifications.length === 0 && (
                 <li>

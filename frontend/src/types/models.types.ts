@@ -75,6 +75,13 @@ export interface StudentLevel {
     success_status: string;
 }
 
+export interface StudentCurrentLevel {
+    student_id: ID;
+    level_id: ID;
+    success_status: string;
+    level: Level;
+}
+
 export interface SubjectLevel {
     subject_id: ID;
     level_id: ID;
@@ -95,11 +102,15 @@ export interface TeacherStudentTopicFlag {
 }
 
 export interface PartGrade {
+    id: ID;
     student_id: ID;
     assigned_by: ID;
     subject_id: ID;
+    subject?: { id: ID; name: string; name_ar: string | null };
+    assignedBy?: { id: ID; first_name: string; last_name: string };
     max_grade: number;
     value: number;
+    label: string | null;
     assigned_at: ISODateString;
     updated_at: ISODateString | null;
 }
@@ -134,6 +145,7 @@ export interface Post {
     type: PostType;
     content: string | null;
     thumbnail_url: string | null;
+    author_alias: string | null;
     created_at: ISODateString;
     updated_at: ISODateString;
     author?: { id: ID; first_name: string; last_name: string };
@@ -159,14 +171,26 @@ export interface Notification {
     timestamp: ISODateString;
 }
 
+export interface ConversationUser {
+    id: ID;
+    first_name: string;
+    last_name: string;
+}
+
+export interface Message {
+    id: ID;
+    conversation_id: ID;
+    sender_id: ID;
+    text: string;
+    timestamp: ISODateString;
+}
+
 export interface Conversation {
     id: ID;
     party1: ID;
     party2: ID;
-}
-
-export interface Message {
-    conversation_id: ID;
-    text: string;
-    timestamp: ISODateString;
+    user1?: ConversationUser;
+    user2?: ConversationUser;
+    /** Last message only — backend returns take:1 desc */
+    messages?: Message[];
 }

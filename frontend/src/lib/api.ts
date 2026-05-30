@@ -122,6 +122,7 @@ export const endpoints = {
         list: (q?: ListQuery) => `/students/v1${qs(q)}`,
         byId: (id: number) => `/students/v1/${id}`,
         history: (id: number) => `/students/v1/${id}/history`,
+        levels:  (id: number) => `/students/v1/${id}/levels`,
     },
     levels: {
         list: (mine?: boolean) => `/levels/v1${mine ? "?mine=true" : ""}`,
@@ -153,6 +154,7 @@ export const endpoints = {
     conversations: {
         list: "/conversations/v1",
         messages: (id: number) => `/conversations/v1/${id}/messages`,
+        withUser: (userId: number) => `/conversations/v1/with/${userId}`,
     },
     grades: {
         forStudent: (studentId: number) => `/grades/v1?student_id=${studentId}`,
