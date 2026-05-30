@@ -1,8 +1,9 @@
 import {
-  Body, Controller, Delete, Get, Param, ParseIntPipe,
+  Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe,
   Patch, Post, Query, Request, UseGuards,
 } from '@nestjs/common';
 import { GradesService } from './grades.service';
+import { StudentsService } from '../students/students.service';
 import { CreateGradeDto } from './dto/create-grade.dto';
 import { UpdateGradeDto } from './dto/update-grade.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,11 +11,18 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('grades/v1')
 export class GradesController {
-  constructor(private readonly gradesService: GradesService) {}
+  constructor(
+    private readonly gradesService: GradesService,
+    private readonly studentsService: StudentsService,
+  ) {}
 
   /** GET /api/grades/v1?student_id=X */
   @Get()
-  findForStudent(@Query('student_id', ParseIntPipe) studentId: number) {
+  async findForStudent(
+    @Query('student_id', ParseIntPipe) studentId: number,
+    @Request() req: { user: { id: number; role: string } },
+  ) {
+    await this.studentsService.assertAccess(req.user.id, req.user.role, studentId);
     return this.gradesService.findForStudent(studentId);
   }
 

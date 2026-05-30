@@ -13,8 +13,14 @@ export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   @Get()
-  findAll(@Query('subject_id') subjectId?: string) {
-    return this.scheduleService.findAll(subjectId ? parseInt(subjectId) : undefined);
+  findAll(
+    @Query('subject_id') subjectId?: string,
+    @Query('level_id') levelId?: string,
+  ) {
+    return this.scheduleService.findAll(
+      subjectId ? parseInt(subjectId) : undefined,
+      levelId   ? parseInt(levelId)   : undefined,
+    );
   }
 
   /** Admin: assign a subject to a day+period slot. */

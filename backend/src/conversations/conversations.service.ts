@@ -23,6 +23,21 @@ export class ConversationsService {
     });
   }
 
+  async findOrCreate(userId: number, otherId: number) {
+    const existing = await this.prisma.conversation.findFirst({
+      where: {
+        OR: [
+          { party1: userId, party2: otherId },
+          { party1: otherId, party2: userId },
+        ],
+      },
+    });
+    if (existing) return existing;
+    return this.prisma.conversation.create({
+      data: { party1: userId, party2: otherId },
+    });
+  }
+
   async sendMessage(conversationId: number, senderId: number, text: string) {
     const msg = await this.prisma.message.create({
       data: { conversation_id: conversationId, sender_id: senderId, text },

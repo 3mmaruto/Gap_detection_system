@@ -320,3 +320,34 @@ body:has(header.fixed-top) {
 h2 { font-size: 1.15rem; font-weight: 700; color: var(--sms-text); }
 
 .text-muted { color: var(--sms-muted) !important; }
+
+/* ─── Facebook-style chat window ────────────────────────────────────────────── */
+
+/* Mobile: full-screen overlay */
+.chat-window {
+    position: fixed;
+    inset: 0;
+    z-index: 1045;
+    border-radius: 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    display: flex;
+    flex-direction: column;
+}
+
+/* md+ (≥ 768 px): floating window anchored to bottom-right */
+@media (min-width: 768px) {
+    .chat-window {
+        inset: auto;
+        bottom: 0;
+        right: 1.25rem;
+        width: 320px;
+        height: 460px;
+        border-radius: 0.75rem 0.75rem 0 0;
+        border: 1px solid var(--sms-border);
+        border-bottom: none;
+    }
+}
+
+.chat-window .overflow-y-auto {
+    overflow-y: auto;
+}

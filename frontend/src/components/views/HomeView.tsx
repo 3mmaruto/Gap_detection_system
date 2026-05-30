@@ -37,9 +37,9 @@ export default function HomeView() {
     const levelId = selectedLevel === ALL ? undefined : selectedLevel;
     const { subjects } = useSubjects({ levelId, mine: isTeacher });
 
-    // Schedule: filtered by selected subject
+    // Schedule: filtered by selected subject, or by grade level when no subject chosen
     const subjectId = selectedSubject === ALL ? undefined : selectedSubject;
-    const { schedule, loading: scheduleLoading, refetch } = useSchedule(subjectId);
+    const { schedule, loading: scheduleLoading, refetch } = useSchedule(subjectId, levelId);
 
     // ── Teacher clickable subject IDs ─────────────────────────────────────────
     const teacherSubjectIds = useMemo(() => {
@@ -62,7 +62,7 @@ export default function HomeView() {
     const handleSaved = () => { refetch(); closeModal(); };
 
     // ── Derived labels ────────────────────────────────────────────────────────
-    const levelOptions  = levels.map((l) => ({ value: l.id, label: `${l.grade_level} — ${l.curriculum_year}` }));
+    const levelOptions  = levels.map((l) => ({ value: l.id, label: l.grade_level }));
     const subjectOptions = subjects.map((s) => ({ value: s.id, label: s.name }));
 
     return (

@@ -21,4 +21,8 @@ export class UpdatePostDto {
   @IsOptional()
   @IsInt()
   subject_id?: number;
+
+  @IsOptional()
+  @IsString()
+  author_alias?: string;
 }

@@ -12,6 +12,14 @@ export class ConversationsController {
     return this.conversationsService.findAll(req.user.id);
   }
 
+  @Post('with/:userId')
+  findOrCreate(
+    @Param('userId', ParseIntPipe) otherId: number,
+    @Request() req: { user: { id: number } },
+  ) {
+    return this.conversationsService.findOrCreate(req.user.id, otherId);
+  }
+
   @Get(':id/messages')
   findMessages(@Param('id', ParseIntPipe) id: number) {
     return this.conversationsService.findMessages(id);
