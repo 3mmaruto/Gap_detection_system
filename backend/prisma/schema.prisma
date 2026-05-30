@@ -1,0 +1,310 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  first_name         String
+  last_name          String
+  brith_date         DateTime?
+  added_by           Int?
+  created_timestamp  DateTime  @default(now())
+  phone              String?
+  password_hash      String
+  last_login_at      DateTime?
+  updated_at         DateTime? @updatedAt
+  gender             String?
+  nationality        String?
+
+  addedByUser        User?     @relation("AddedByUser", fields: [added_by], references: [id])
+  addedUsers         User[]    @relation("AddedByUser")
+
+  student            Student?
+  teacher            Teacher?
+  admin              Admin?
+
+  notifications      Notification[]
+  postsAuthored      Post[]
+  partGradesAssigned PartGrade[]    @relation("AssignedBy")
+  scheduleItemsAssigned ScheduleItem[] @relation("ScheduleAssignedBy")
+  syllabusItemsAssigned SyllabusItem[] @relation("SyllabusAssignedBy")
+
+  conversationsAsParty1 Conversation[] @relation("ConvParty1")
+  conversationsAsParty2 Conversation[] @relation("ConvParty2")
+
+  @@map("users")
+}
+
+model Student {
+  user_id       Int     @id
+  parent_phone  String?
+  father_name   String?
+  mother_name   String?
+
+  user          User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  academicHistory        StudentAcademicHistory[]
+  levels                 StudentLevel[]
+  partGrades             PartGrade[]
+  teacherTopicFlags      TeacherStudentTopicFlag[]
+
+  @@map("students")
+}
+
+model Teacher {
+  user_id  Int  @id
+
+  user     User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  subjects         TeacherSubject[]
+  teacherTopicFlags TeacherStudentTopicFlag[]
+
+  @@map("teachers")
+}
+
+model Admin {
+  user_id  Int  @id
+
+  user     User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("admins")
+}
+
+model StudentAcademicHistory {
+  student_id   Int
+  grade_level  String
+  country      String?
+  school_name  String?
+  gpa          Float?
+
+  student      Student @relation(fields: [student_id], references: [user_id], onDelete: Cascade)
+
+  @@id([student_id, grade_level])
+  @@map("student_academic_history")
+}
+
+model Subject {
+  id            Int     @id @default(autoincrement())
+  learning_path String?
+  name          String
+  name_ar       String?
+
+  topics        Topic[]
+  teacherSubjects TeacherSubject[]
+  subjectLevels  SubjectLevel[]
+  scheduleItems  ScheduleItem[]
+  partGrades     PartGrade[]
+  posts          Post[]
+
+  @@map("subjects")
+}
+
+model Topic {
+  id         Int     @id @default(autoincrement())
+  subject_id Int
+  name       String
+  name_ar    String?
+
+  subject    Subject @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+
+  syllabusItems         SyllabusItem[]
+  teacherStudentTopicFlags TeacherStudentTopicFlag[]
+
+  @@map("topics")
+}
+
+model Level {
+  id              Int    @id @default(autoincrement())
+  grade_level     String
+  curriculum_year String
+
+  studentLevels   StudentLevel[]
+  subjectLevels   SubjectLevel[]
+  teacherSubjects TeacherSubject[]
+
+  @@map("levels")
+}
+
+model StudentLevel {
+  student_id     Int
+  level_id       Int
+  success_status String
+
+  student        Student @relation(fields: [student_id], references: [user_id], onDelete: Cascade)
+  level          Level   @relation(fields: [level_id], references: [id], onDelete: Cascade)
+
+  @@id([student_id, level_id])
+  @@map("student_levels")
+}
+
+model SubjectLevel {
+  subject_id Int
+  level_id   Int
+
+  subject    Subject @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  level      Level   @relation(fields: [level_id], references: [id], onDelete: Cascade)
+
+  @@id([subject_id, level_id])
+  @@map("subject_levels")
+}
+
+model TeacherSubject {
+  teacher_id  Int
+  subject_id  Int
+  level_id    Int
+  assigned_at DateTime @default(now())
+
+  teacher     Teacher  @relation(fields: [teacher_id], references: [user_id], onDelete: Cascade)
+  subject     Subject  @relation(fields: [subject_id], references: [id], onDelete: Cascade)
+  level       Level    @relation(fields: [level_id], references: [id], onDelete: Cascade)
+
+  @@id([teacher_id, subject_id, level_id])
+  @@map("teacher_subjects")
+}
+
+model TeacherStudentTopicFlag {
+  teacher_id Int
+  student_id Int
+  topic_id   Int
+  risk_level String
+  notes      String?
+
+  teacher    Teacher @relation(fields: [teacher_id], references: [user_id], onDelete: Cascade)
+  student    Student @relation(fields: [student_id], references: [user_id], onDelete: Cascade)
+  topic      Topic   @relation(fields: [topic_id], references: [id], onDelete: Cascade)
+
+  @@id([teacher_id, student_id, topic_id])
+  @@map("teacher_student_topic_flags")
+}
+
+model PartGrade {
+  id          Int       @id @default(autoincrement())
+  student_id  Int
+  assigned_by Int
+  subject_id  Int
+  max_grade   Float
+  value       Float
+  label       String?
+  assigned_at DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  student     Student   @relation(fields: [student_id], references: [user_id], onDelete: Cascade)
+  assignedBy  User      @relation("AssignedBy", fields: [assigned_by], references: [id])
+  subject     Subject   @relation(fields: [subject_id], references: [id])
+
+  @@map("part_grades")
+}
+
+model ScheduleItem {
+  id          Int    @id @default(autoincrement())
+  subject_id  Int
+  assigned_by Int
+  day         String // "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT"
+  period      Int    // 1-7
+
+  subject     Subject  @relation(fields: [subject_id], references: [id])
+  assignedBy  User     @relation("ScheduleAssignedBy", fields: [assigned_by], references: [id])
+
+  syllabusItems SyllabusItem[]
+
+  @@unique([day, period])
+  @@map("schedule_items")
+}
+
+model SyllabusItem {
+  id               Int  @id @default(autoincrement())
+  schedule_item_id Int
+  topic_id         Int
+  assigned_by      Int
+
+  scheduleItem     ScheduleItem @relation(fields: [schedule_item_id], references: [id], onDelete: Cascade)
+  topic            Topic        @relation(fields: [topic_id], references: [id])
+  assignedBy       User         @relation("SyllabusAssignedBy", fields: [assigned_by], references: [id])
+
+  @@map("syllabus_items")
+}
+
+model Post {
+  id            Int      @id @default(autoincrement())
+  subject_id    Int?
+  user_id       Int
+  title         String
+  type          PostType @default(ANNOUNCEMENT)
+  content       String?
+  thumbnail_url String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  subject       Subject? @relation(fields: [subject_id], references: [id])
+  author        User     @relation(fields: [user_id], references: [id])
+
+  attachments   PostAttachment[]
+
+  @@map("posts")
+}
+
+enum PostType {
+  ANNOUNCEMENT
+  CURRICULUM_POST
+  HOMEWORK
+}
+
+model PostAttachment {
+  id       Int    @id @default(autoincrement())
+  post_id  Int
+  url      String
+  filename String?
+
+  post     Post   @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@map("post_attachments")
+}
+
+model Notification {
+  id        Int              @id @default(autoincrement())
+  user_id   Int
+  type      NotificationType @default(SYSTEM)
+  seen      Boolean          @default(false)
+  text      String
+  timestamp DateTime         @default(now())
+
+  user      User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  MESSAGE
+  GRADE
+  POST
+  SYSTEM
+}
+
+model Conversation {
+  id      Int  @id @default(autoincrement())
+  party1  Int
+  party2  Int
+
+  user1   User @relation("ConvParty1", fields: [party1], references: [id])
+  user2   User @relation("ConvParty2", fields: [party2], references: [id])
+
+  messages Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id              Int      @id @default(autoincrement())
+  conversation_id Int
+  sender_id       Int
+  text            String
+  timestamp       DateTime @default(now())
+
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}

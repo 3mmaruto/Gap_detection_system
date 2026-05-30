@@ -1,0 +1,322 @@
+/* ─── Brand palette ────────────────────────────────────────────────────────── */
+:root {
+    --sms-primary:       #6366f1;   /* indigo-500  */
+    --sms-primary-dark:  #4f46e5;   /* indigo-600  */
+    --sms-primary-xdark: #4338ca;   /* indigo-700  */
+    --sms-primary-light: #a5b4fc;   /* indigo-300  */
+    --sms-primary-pale:  #e0e7ff;   /* indigo-100  */
+    --sms-header-bg:     #1e1b4b;   /* indigo-950  */
+    --sms-header-border: rgba(255,255,255,0.07);
+    --sms-surface:       #eef2ff;   /* indigo-50   */
+    --sms-card-bg:       #ffffff;
+    --sms-border:        #e2e8f0;
+    --sms-text:          #1e293b;   /* slate-800   */
+    --sms-muted:         #64748b;   /* slate-500   */
+
+    /* Override Bootstrap link colour */
+    --bs-link-color:        #6366f1;
+    --bs-link-color-rgb:    99,102,241;
+    --bs-link-hover-color:  #4f46e5;
+
+    /* Bootstrap surface */
+    --surface: var(--sms-surface);
+}
+
+/* ─── Body / background grid ────────────────────────────────────────────────── */
+body {
+    color: var(--sms-text);
+    background:
+        linear-gradient(90deg,  rgba(99,102,241,0.055) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(99,102,241,0.045) 1px, transparent 1px),
+        var(--surface);
+    background-size: 44px 44px;
+}
+
+body:has(header.fixed-top) {
+    padding-top: 4.5rem;
+}
+
+/* ─── Bootstrap primary overrides ─────────────────────────────────────────── */
+.btn-primary {
+    --bs-btn-bg:              var(--sms-primary);
+    --bs-btn-border-color:    var(--sms-primary);
+    --bs-btn-hover-bg:        var(--sms-primary-dark);
+    --bs-btn-hover-border-color: var(--sms-primary-dark);
+    --bs-btn-active-bg:       var(--sms-primary-xdark);
+    --bs-btn-active-border-color: var(--sms-primary-xdark);
+    --bs-btn-focus-shadow-rgb: 99,102,241;
+}
+
+.btn-outline-primary {
+    --bs-btn-color:           var(--sms-primary);
+    --bs-btn-border-color:    var(--sms-primary);
+    --bs-btn-hover-color:     #fff;
+    --bs-btn-hover-bg:        var(--sms-primary);
+    --bs-btn-hover-border-color: var(--sms-primary);
+    --bs-btn-active-bg:       var(--sms-primary-dark);
+    --bs-btn-focus-shadow-rgb: 99,102,241;
+}
+
+.page-link { color: var(--sms-primary); }
+.page-item.active .page-link {
+    background-color: var(--sms-primary);
+    border-color:     var(--sms-primary);
+}
+.page-link:focus { box-shadow: 0 0 0 .25rem rgba(99,102,241,.25); }
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--sms-primary-light);
+    box-shadow:   0 0 0 .25rem rgba(99,102,241,.18);
+}
+
+.badge.bg-primary,
+.bg-primary { background-color: var(--sms-primary) !important; }
+
+.badge.bg-secondary { background-color: #6b7280 !important; }
+
+/* ─── Header — role-scoped CSS variables ─────────────────────────────────────
+   Each role class overrides three tokens used throughout the header:
+     --h-bg      : the main dark background
+     --h-accent  : active-link bg and glow colour
+     --h-muted   : inactive link / icon colour (light tint of accent)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.sms-header {
+    /* default (no role yet / fallback) = teacher palette */
+    --h-bg:     #1e1b4b;   /* indigo-950  */
+    --h-accent: #6366f1;   /* indigo-500  */
+    --h-muted:  #c7d2fe;   /* indigo-200  */
+}
+
+/* ── Student: sky / teal — bright & youthful ── */
+.sms-header--student {
+    --h-bg:     #0c4a6e;   /* sky-900     */
+    --h-accent: #38bdf8;   /* sky-400     */
+    --h-muted:  #bae6fd;   /* sky-200     */
+}
+
+/* ── Teacher: violet / indigo — professional ── */
+.sms-header--teacher {
+    --h-bg:     #2e1065;   /* violet-950  */
+    --h-accent: #a78bfa;   /* violet-400  */
+    --h-muted:  #ddd6fe;   /* violet-200  */
+}
+
+/* ── Admin: deep red — authoritative ── */
+.sms-header--admin {
+    --h-bg:     #450a0a;   /* red-950     */
+    --h-accent: #f87171;   /* red-400     */
+    --h-muted:  #fecaca;   /* red-200     */
+}
+
+.sms-header {
+    background-color: var(--h-bg) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.28);
+    transition: background-color .3s ease;
+}
+
+/* Nav links in header */
+.sms-header .nav-link {
+    color: var(--h-muted) !important;
+    border-radius: .375rem;
+    padding: .35rem .75rem;
+    font-size: .9rem;
+    font-weight: 500;
+    transition: background .15s ease, color .15s ease;
+}
+
+.sms-header .nav-link:hover {
+    background-color: rgba(255,255,255,.1);
+    color: #fff !important;
+}
+
+.sms-header .nav-link.active {
+    background-color: var(--h-accent) !important;
+    color: #fff !important;
+    border-radius: .375rem;
+}
+
+/* Icons in header (bell, chat, person) */
+.sms-header .dropdown > a.nav-link,
+.sms-header .dropdown > a {
+    color: var(--h-muted) !important;
+    border-radius: .375rem;
+    padding: .35rem .6rem;
+    transition: background .15s ease, color .15s ease;
+}
+
+.sms-header .dropdown > a.nav-link:hover,
+.sms-header .dropdown > a:hover {
+    background-color: rgba(255,255,255,.1);
+    color: #fff !important;
+}
+
+/* Search bar inside header */
+.sms-header .form-control {
+    background-color: rgba(255,255,255,.1);
+    border-color:     rgba(255,255,255,.2);
+    color:            #e0e7ff;
+}
+.sms-header .form-control::placeholder { color: rgba(255,255,255,.4); }
+.sms-header .form-control:focus {
+    background-color: rgba(255,255,255,.15);
+    border-color: rgba(255,255,255,.4);
+    color: #fff;
+    box-shadow: 0 0 0 .2rem rgba(255,255,255,.15);
+}
+
+/* Hamburger toggler */
+.sms-header .navbar-toggler { color: var(--h-muted); border-color: rgba(255,255,255,.2); }
+
+/* ─── Notification / message dropdown — full-width < md, fixed width ≥ md ───── */
+
+/* Shared base styles for both breakpoints */
+.dropdown-menu-fw {
+    position: fixed !important;
+    top:        4.5rem !important;
+    transform:  none !important;
+    margin-top: 0 !important;
+    border-top: none !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    border-bottom: 3px solid var(--h-accent, var(--sms-primary)) !important;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* < 768 px  →  full viewport width */
+@media (max-width: 767.98px) {
+    .dropdown-menu-fw {
+        left:          0    !important;
+        right:         0    !important;
+        width:         100vw !important;
+        border-left:   none !important;
+        border-right:  none !important;
+        border-radius: 0 0 .6rem .6rem !important;
+    }
+}
+
+/* ≥ 768 px  →  fixed 360 px, aligned to the right edge of the toggle */
+@media (min-width: 768px) {
+    .dropdown-menu-fw {
+        right:         0    !important;
+        left:          auto !important;
+        width:         360px !important;
+        border-radius: .6rem !important;
+        border:        1px solid var(--sms-border) !important;
+        border-top:    none !important;
+    }
+}
+
+.dropdown-menu-fw .dropdown-header {
+    font-weight: 700;
+    font-size: .8rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--sms-muted);
+}
+
+/* ─── Regular dropdown menus ────────────────────────────────────────────────── */
+.dropdown-menu {
+    border: 1px solid var(--sms-border);
+    border-radius: .6rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.10);
+    padding: .35rem;
+}
+
+.dropdown-item {
+    border-radius: .375rem;
+    font-size: .9rem;
+    padding: .45rem .75rem;
+    transition: background .12s ease, color .12s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--sms-primary-pale);
+    color: var(--sms-primary-dark);
+}
+
+.dropdown-divider { border-color: var(--sms-border); margin: .3rem 0; }
+
+/* ─── Cards ─────────────────────────────────────────────────────────────────── */
+.sms-card {
+    background-color: var(--sms-card-bg);
+    border: 1px solid #dde3f0 !important;
+    border-radius: .75rem !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05), 0 6px 18px rgba(99,102,241,.05);
+}
+
+/* Override the existing bg-white border usage in Card.tsx via specificity bump */
+.bg-white.border.rounded {
+    border-color: #dde3f0 !important;
+    border-radius: .75rem !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05), 0 6px 18px rgba(99,102,241,.05);
+}
+
+/* ─── Table ─────────────────────────────────────────────────────────────────── */
+.table {
+    --bs-table-hover-bg: rgba(99,102,241,.045);
+    border-color: #e8ecf5;
+}
+
+.table thead th {
+    background-color: #f5f7fe;
+    color: var(--sms-muted);
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-bottom: 2px solid #dde3f0;
+    white-space: nowrap;
+}
+
+.table tbody tr:hover { cursor: default; }
+
+.table-responsive { border-radius: .5rem; overflow: hidden; }
+
+/* Schedule table refinement */
+.border.rounded-3 {
+    border-color: #dde3f0 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+}
+
+/* ─── Filter bar buttons ─────────────────────────────────────────────────────── */
+.filter-bar-btn {
+    font-size: .85rem;
+    padding: .3rem .9rem;
+    border-radius: 2rem;
+}
+
+/* ─── Progress bar ──────────────────────────────────────────────────────────── */
+.sms-progress-track { background-color: var(--sms-primary-pale); }
+.sms-progress-fill  { background: linear-gradient(90deg, var(--sms-primary), var(--sms-primary-dark)); }
+
+/* ─── Login page ─────────────────────────────────────────────────────────────── */
+.sms-login-card {
+    background: rgba(255,255,255,.93);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+
+/* ─── Offcanvas (mobile nav) ─────────────────────────────────────────────────── */
+.offcanvas {
+    background-color: var(--h-bg, var(--sms-header-bg)) !important;
+    color: var(--h-muted, #c7d2fe);
+    transition: background-color .3s ease;
+}
+
+.offcanvas .nav-link { color: var(--h-muted, #c7d2fe) !important; }
+.offcanvas .nav-link:hover { color: #fff !important; }
+.offcanvas .nav-link.active {
+    background-color: var(--h-accent, var(--sms-primary)) !important;
+    color: #fff !important;
+}
+
+/* ─── Misc ───────────────────────────────────────────────────────────────────── */
+h2 { font-size: 1.15rem; font-weight: 700; color: var(--sms-text); }
+
+.text-muted { color: var(--sms-muted) !important; }
