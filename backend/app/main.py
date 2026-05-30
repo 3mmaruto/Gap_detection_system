@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routes import (
     analysis,
     analysis_runs,
+    auth,
     curriculum,
     db_health,
     graphs,
@@ -14,6 +15,7 @@ from app.routes import (
     schools,
     student_cases,
     students,
+    users,
 )
 
 app = FastAPI(
@@ -31,10 +33,12 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(auth.router)
 app.include_router(db_health.router)
 app.include_router(schools.router)
 app.include_router(students.router)
 app.include_router(student_cases.router)
+app.include_router(users.router)
 app.include_router(curriculum.router)
 app.include_router(analysis_runs.router)
 app.include_router(recommendations.router)

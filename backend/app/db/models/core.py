@@ -119,6 +119,9 @@ class Student(Base, TimestampMixin):
     nationality: Mapped[str | None] = mapped_column(String(120))
     current_grade: Mapped[str | None] = mapped_column(String(40))
     current_stream: Mapped[str | None] = mapped_column(String(80))
+    student_phone: Mapped[str | None] = mapped_column(String(80))
+    mother_phone: Mapped[str | None] = mapped_column(String(80))
+    father_phone: Mapped[str | None] = mapped_column(String(80))
     current_section_id: Mapped[int | None] = mapped_column(ForeignKey("class_sections.id"))
     status: Mapped[str] = mapped_column(String(40), default="active")
 
@@ -250,6 +253,7 @@ class StudentEducationPath(Base):
     case_id: Mapped[int | None] = mapped_column(ForeignKey("student_cases.id"))
     grade: Mapped[str] = mapped_column(String(40), nullable=False)
     country: Mapped[str] = mapped_column(String(120), nullable=False)
+    stream: Mapped[str | None] = mapped_column(String(80))
     city: Mapped[str | None] = mapped_column(String(120))
     school_name: Mapped[str | None] = mapped_column(String(255))
     curriculum_system_id: Mapped[int | None] = mapped_column(ForeignKey("curriculum_systems.id"))
