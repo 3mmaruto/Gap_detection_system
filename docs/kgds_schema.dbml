@@ -89,6 +89,7 @@ Table class_sections {
 
 Table students {
   id int [pk]
+  user_id int [ref: > users.id, unique]
   school_id int [ref: > schools.id]
   student_number varchar
   first_name varchar
@@ -101,6 +102,9 @@ Table students {
   nationality varchar
   current_grade varchar
   current_stream varchar
+  student_phone varchar
+  mother_phone varchar
+  father_phone varchar
   current_section_id int [ref: > class_sections.id]
   status varchar
   created_at timestamp
@@ -128,6 +132,90 @@ Table teacher_assignments {
   subject_id int [ref: > subjects.id]
   academic_year_id int [ref: > academic_years.id]
   status varchar
+}
+
+Table posts {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  subject_id int [ref: > subjects.id]
+  user_id int [ref: > users.id]
+  title varchar
+  type varchar
+  content text
+  thumbnail_url text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table post_attachments {
+  id int [pk]
+  post_id int [ref: > posts.id]
+  url text
+  filename varchar
+}
+
+Table schedule_items {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  subject_id int [ref: > subjects.id]
+  assigned_by int [ref: > users.id]
+  day varchar
+  period int
+  level_id int [ref: > class_sections.id]
+
+  Indexes {
+    (school_id, day, period) [unique, name: "uq_school_schedule_slot"]
+  }
+}
+
+Table syllabus_items {
+  id int [pk]
+  schedule_item_id int [ref: > schedule_items.id]
+  topic_id int [ref: > curriculum_topics.id]
+  assigned_by int [ref: > users.id]
+  topic_title varchar
+  reference varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table part_grades {
+  id int [pk]
+  student_id int [ref: > students.id]
+  assigned_by int [ref: > users.id]
+  subject_id int [ref: > subjects.id]
+  max_grade float
+  value float
+  label varchar
+  assigned_at timestamp
+  updated_at timestamp
+}
+
+Table notifications {
+  id int [pk]
+  user_id int [ref: > users.id]
+  type varchar
+  seen boolean
+  text text
+  timestamp timestamp
+}
+
+Table conversations {
+  id int [pk]
+  party1 int [ref: > users.id]
+  party2 int [ref: > users.id]
+
+  Indexes {
+    (party1, party2) [unique, name: "uq_conversation_parties"]
+  }
+}
+
+Table messages {
+  id int [pk]
+  conversation_id int [ref: > conversations.id]
+  sender_id int [ref: > users.id]
+  text text
+  timestamp timestamp
 }
 
 // Curriculum Knowledge Base
@@ -247,6 +335,7 @@ Table student_education_paths {
   case_id int [ref: > student_cases.id]
   grade varchar
   country varchar
+  stream varchar
   city varchar
   school_name varchar
   curriculum_system_id int [ref: > curriculum_systems.id]

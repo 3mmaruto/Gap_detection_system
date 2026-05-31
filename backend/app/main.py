@@ -11,6 +11,7 @@ from app.routes import (
     db_health,
     graphs,
     health,
+    partner_portal,
     recommendations,
     schools,
     student_cases,
@@ -44,3 +45,4 @@ app.include_router(analysis_runs.router)
 app.include_router(recommendations.router)
 app.include_router(analysis.router)
 app.include_router(graphs.router)
+app.include_router(partner_portal.router)

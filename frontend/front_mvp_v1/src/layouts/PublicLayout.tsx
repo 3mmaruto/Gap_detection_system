@@ -16,7 +16,7 @@ export function PublicLayout({ children }: { children: React.ReactNode }) {
           <button type="button" onClick={() => navigate("/methodology")}>
             Methodology
           </button>
-          <button type="button" onClick={() => navigate("/login")}>
+          <button type="button" onClick={() => navigate("/login/admin")}>
             Login
           </button>
           <button className="nav-cta" type="button" onClick={() => navigate("/register-school")}>

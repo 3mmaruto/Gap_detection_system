@@ -107,6 +107,7 @@ class Student(Base, TimestampMixin):
     __table_args__ = (UniqueConstraint("school_id", "student_number", name="uq_school_student_number"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), unique=True)
     school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
     student_number: Mapped[str | None] = mapped_column(String(80))
     first_name: Mapped[str | None] = mapped_column(String(120))
@@ -160,6 +161,96 @@ class TeacherAssignment(Base):
     subject_id: Mapped[int | None] = mapped_column(ForeignKey("subjects.id"))
     academic_year_id: Mapped[int] = mapped_column(ForeignKey("academic_years.id"), nullable=False)
     status: Mapped[str] = mapped_column(String(40), default="active")
+
+
+class Post(Base, TimestampMixin):
+    __tablename__ = "posts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    school_id: Mapped[int | None] = mapped_column(ForeignKey("schools.id"))
+    subject_id: Mapped[int | None] = mapped_column(ForeignKey("subjects.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    type: Mapped[str] = mapped_column(String(40), default="ANNOUNCEMENT")
+    content: Mapped[str | None] = mapped_column(Text)
+    thumbnail_url: Mapped[str | None] = mapped_column(Text)
+
+
+class PostAttachment(Base):
+    __tablename__ = "post_attachments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), nullable=False)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    filename: Mapped[str | None] = mapped_column(String(255))
+
+
+class ScheduleItem(Base):
+    __tablename__ = "schedule_items"
+    __table_args__ = (UniqueConstraint("school_id", "day", "period", name="uq_school_schedule_slot"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    school_id: Mapped[int] = mapped_column(ForeignKey("schools.id"), nullable=False)
+    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False)
+    assigned_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    day: Mapped[str] = mapped_column(String(12), nullable=False)
+    period: Mapped[int] = mapped_column(Integer, nullable=False)
+    level_id: Mapped[int | None] = mapped_column(ForeignKey("class_sections.id"))
+
+
+class SyllabusItem(Base, TimestampMixin):
+    __tablename__ = "syllabus_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    schedule_item_id: Mapped[int] = mapped_column(ForeignKey("schedule_items.id"), nullable=False)
+    topic_id: Mapped[int | None] = mapped_column(ForeignKey("curriculum_topics.id"))
+    assigned_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    topic_title: Mapped[str] = mapped_column(String(255), nullable=False)
+    reference: Mapped[str | None] = mapped_column(String(120))
+
+
+class PartGrade(Base):
+    __tablename__ = "part_grades"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("students.id"), nullable=False)
+    assigned_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), nullable=False)
+    max_grade: Mapped[float] = mapped_column(Float, nullable=False)
+    value: Mapped[float] = mapped_column(Float, nullable=False)
+    label: Mapped[str | None] = mapped_column(String(160))
+    assigned_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    type: Mapped[str] = mapped_column(String(40), default="SYSTEM")
+    seen: Mapped[bool] = mapped_column(Boolean, default=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Conversation(Base):
+    __tablename__ = "conversations"
+    __table_args__ = (UniqueConstraint("party1", "party2", name="uq_conversation_parties"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    party1: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    party2: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id"), nullable=False)
+    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class CurriculumSystem(Base):

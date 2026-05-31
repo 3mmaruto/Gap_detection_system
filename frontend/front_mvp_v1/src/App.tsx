@@ -1155,7 +1155,7 @@ function LoginRequiredPage() {
       <main className="auth-page">
         <Card className="auth-card">
           <SectionHeader eyebrow="Session required" title="Sign in to continue" text="Use the local MVP school admin account to open the workspace." />
-          <button className="primary-button" type="button" onClick={() => navigate("/login")}>
+          <button className="primary-button" type="button" onClick={() => navigate("/login/admin")}>
             Go to login
           </button>
         </Card>
@@ -1190,7 +1190,7 @@ export default function App() {
     if (pathname === "/") return <LandingPage />;
     if (pathname === "/about") return <AboutPage />;
     if (pathname === "/methodology") return <MethodologyPage />;
-    if (pathname === "/login") return <LoginPage />;
+    if (pathname === "/login" || pathname === "/login/admin") return <LoginPage />;
     if (pathname === "/register-school") return <RegisterSchoolPage />;
     if (isPrivateRoute && !user) return <LoginRequiredPage />;
     if (pathname === "/dashboard") return <DashboardHome />;

@@ -1,0 +1,217 @@
+Project kgds_knowledge_gap_subsystem {
+  database_type: "PostgreSQL"
+  Note: "Focused ERD for the rule-based KGDS knowledge graph, analysis, reports, and support recommendations."
+}
+
+Table subjects {
+  id int [pk]
+  code varchar [unique]
+  name_en varchar
+  name_native varchar
+  description text
+}
+
+Table curriculum_systems {
+  id int [pk]
+  name varchar
+  country varchar
+  language varchar
+  description text
+  status varchar
+}
+
+Table curriculum_versions {
+  id int [pk]
+  curriculum_system_id int [ref: > curriculum_systems.id]
+  version_name varchar
+  year_from int
+  year_to int
+  description text
+  is_active boolean
+}
+
+Table curriculum_topics {
+  id int [pk]
+  external_topic_id varchar [unique]
+  curriculum_system_id int [ref: > curriculum_systems.id]
+  curriculum_version_id int [ref: > curriculum_versions.id]
+  country varchar
+  grade varchar
+  stream varchar
+  subject_id int [ref: > subjects.id]
+  subject_branch varchar
+  unit_name_native varchar
+  unit_name_en varchar
+  topic_name_native varchar
+  topic_name_en varchar
+  topic_order float
+  is_core_topic boolean
+  difficulty_level varchar
+  metadata_json jsonb
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table curriculum_edges {
+  id int [pk]
+  source_topic_id int [ref: > curriculum_topics.id]
+  target_topic_id int [ref: > curriculum_topics.id]
+  relation_type varchar
+  weight float
+  description text
+  metadata_json jsonb
+
+  Indexes {
+    (source_topic_id, target_topic_id, relation_type) [unique, name: "uq_curriculum_edge"]
+  }
+}
+
+Table curriculum_equivalences {
+  id int [pk]
+  topic_id_a int [ref: > curriculum_topics.id]
+  topic_id_b int [ref: > curriculum_topics.id]
+  equivalence_type varchar
+  confidence_score float
+  notes text
+  source varchar
+}
+
+Table curriculum_import_batches {
+  id int [pk]
+  source_type varchar
+  source_uri text
+  imported_by_user_id int [ref: > users.id]
+  imported_at timestamp
+  status varchar
+  summary_json jsonb
+}
+
+Table users {
+  id int [pk]
+  full_name varchar
+}
+
+Table schools {
+  id int [pk]
+  name varchar
+}
+
+Table students {
+  id int [pk]
+  user_id int [ref: > users.id]
+  school_id int [ref: > schools.id]
+  full_name varchar
+  current_grade varchar
+  current_stream varchar
+}
+
+Table student_cases {
+  id int [pk]
+  student_id int [ref: > students.id]
+  school_id int [ref: > schools.id]
+  case_code varchar [unique]
+  origin_country varchar
+  target_country varchar
+  target_grade varchar
+  target_stream varchar
+  subject_focus varchar
+  grades_studied_abroad jsonb
+  last_completed_grade_abroad varchar
+  overall_difficulty float
+  math_difficulty float
+  notes text
+  raw_input_json jsonb
+  created_by_user_id int [ref: > users.id]
+  status varchar
+}
+
+Table student_education_paths {
+  id int [pk]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  grade varchar
+  country varchar
+  stream varchar
+  school_name varchar
+  curriculum_system_id int [ref: > curriculum_systems.id]
+  completed_status varchar
+  evidence_type varchar
+  source_confidence float
+}
+
+Table uploaded_documents {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  uploaded_by_user_id int [ref: > users.id]
+  document_type varchar
+  storage_uri text
+}
+
+Table analysis_runs {
+  id int [pk]
+  case_id int [ref: > student_cases.id]
+  student_id int [ref: > students.id]
+  school_id int [ref: > schools.id]
+  analysis_type varchar
+  input_snapshot_json jsonb
+  rule_engine_version varchar
+  status varchar
+  started_at timestamp
+  completed_at timestamp
+  created_by_user_id int [ref: > users.id]
+  error_message text
+}
+
+Table detected_gaps {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  topic_id int [ref: > curriculum_topics.id]
+  gap_type varchar
+  severity_score float
+  status varchar
+  evidence_json jsonb
+  explanation_text text
+}
+
+Table support_recommendations {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  topic_id int [ref: > curriculum_topics.id]
+  priority_rank int
+  recommendation_type varchar
+  reason_text text
+  evidence_json jsonb
+}
+
+Table graph_snapshots {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  graph_type varchar
+  nodes_json jsonb
+  edges_json jsonb
+  created_at timestamp
+}
+
+Table teacher_reports {
+  id int [pk]
+  analysis_run_id int [ref: > analysis_runs.id]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  report_title varchar
+  summary_text text
+  teacher_alert_text text
+  recommended_plan_json jsonb
+  generated_by_user_id int [ref: > users.id]
+}
+
+Table teacher_feedback {
+  id int [pk]
+  report_id int [ref: > teacher_reports.id]
+  analysis_run_id int [ref: > analysis_runs.id]
+  teacher_user_id int [ref: > users.id]
+  feedback_type varchar
+  feedback_text text
+  corrected_topic_id int [ref: > curriculum_topics.id]
+}

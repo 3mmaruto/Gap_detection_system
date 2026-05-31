@@ -1,0 +1,208 @@
+Project kgds_school_management_subsystem {
+  database_type: "PostgreSQL"
+  Note: "Focused ERD for school administration, student/teacher portal, schedule, posts, grades, notifications, and messaging."
+}
+
+Table schools {
+  id int [pk]
+  name varchar
+  code varchar [unique]
+  type varchar
+  country varchar
+  city varchar
+  status varchar
+}
+
+Table academic_years {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  name varchar
+  start_date date
+  end_date date
+  is_active boolean
+}
+
+Table users {
+  id int [pk]
+  full_name varchar
+  email varchar [unique]
+  phone varchar
+  password_hash varchar
+  status varchar
+  last_login_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table roles {
+  id int [pk]
+  name varchar [unique]
+  description text
+}
+
+Table user_roles {
+  id int [pk]
+  user_id int [ref: > users.id]
+  role_id int [ref: > roles.id]
+  school_id int [ref: > schools.id]
+}
+
+Table subjects {
+  id int [pk]
+  code varchar [unique]
+  name_en varchar
+  name_native varchar
+}
+
+Table class_sections {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  academic_year_id int [ref: > academic_years.id]
+  grade varchar
+  stream varchar
+  section_name varchar
+  homeroom_teacher_id int [ref: > users.id]
+  status varchar
+}
+
+Table students {
+  id int [pk]
+  user_id int [ref: > users.id, unique]
+  school_id int [ref: > schools.id]
+  student_number varchar
+  first_name varchar
+  father_name varchar
+  mother_name varchar
+  last_name varchar
+  full_name varchar
+  date_of_birth date
+  gender varchar
+  nationality varchar
+  current_grade varchar
+  current_stream varchar
+  student_phone varchar
+  mother_phone varchar
+  father_phone varchar
+  current_section_id int [ref: > class_sections.id]
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table enrollments {
+  id int [pk]
+  student_id int [ref: > students.id]
+  class_section_id int [ref: > class_sections.id]
+  academic_year_id int [ref: > academic_years.id]
+  enrollment_date date
+  status varchar
+}
+
+Table student_education_paths {
+  id int [pk]
+  student_id int [ref: > students.id]
+  case_id int [ref: > student_cases.id]
+  grade varchar
+  country varchar
+  stream varchar
+  school_name varchar
+  completed_status varchar
+  evidence_type varchar
+}
+
+Table student_cases {
+  id int [pk]
+  student_id int [ref: > students.id]
+  school_id int [ref: > schools.id]
+  case_code varchar [unique]
+  origin_country varchar
+  target_country varchar
+  target_grade varchar
+  target_stream varchar
+  subject_focus varchar
+  status varchar
+}
+
+Table teacher_assignments {
+  id int [pk]
+  teacher_user_id int [ref: > users.id]
+  school_id int [ref: > schools.id]
+  class_section_id int [ref: > class_sections.id]
+  subject_id int [ref: > subjects.id]
+  academic_year_id int [ref: > academic_years.id]
+  status varchar
+}
+
+Table schedule_items {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  subject_id int [ref: > subjects.id]
+  assigned_by int [ref: > users.id]
+  day varchar
+  period int
+  level_id int [ref: > class_sections.id]
+}
+
+Table syllabus_items {
+  id int [pk]
+  schedule_item_id int [ref: > schedule_items.id]
+  topic_id int
+  assigned_by int [ref: > users.id]
+  topic_title varchar
+  reference varchar
+}
+
+Table posts {
+  id int [pk]
+  school_id int [ref: > schools.id]
+  subject_id int [ref: > subjects.id]
+  user_id int [ref: > users.id]
+  title varchar
+  type varchar
+  content text
+  thumbnail_url text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table post_attachments {
+  id int [pk]
+  post_id int [ref: > posts.id]
+  url text
+  filename varchar
+}
+
+Table part_grades {
+  id int [pk]
+  student_id int [ref: > students.id]
+  assigned_by int [ref: > users.id]
+  subject_id int [ref: > subjects.id]
+  max_grade float
+  value float
+  label varchar
+  assigned_at timestamp
+  updated_at timestamp
+}
+
+Table notifications {
+  id int [pk]
+  user_id int [ref: > users.id]
+  type varchar
+  seen boolean
+  text text
+  timestamp timestamp
+}
+
+Table conversations {
+  id int [pk]
+  party1 int [ref: > users.id]
+  party2 int [ref: > users.id]
+}
+
+Table messages {
+  id int [pk]
+  conversation_id int [ref: > conversations.id]
+  sender_id int [ref: > users.id]
+  text text
+  timestamp timestamp
+}
